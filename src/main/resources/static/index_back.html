@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>Prometheus-nVisual 集成插件配置</title>
+  <style>
+    html,body {
+      height: 100%;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      overflow: hidden;
+    }
+
+    h1 {
+      /* padding-left: 32px; */
+      text-align: center;
+      margin-top: 32px;
+      color: #4d4d4d;
+    }
+
+    main {
+      display: flex;
+      flex-flow: column;
+      justify-content: space-between;
+      width: 90%;
+      height: calc(100% - 250px);
+      line-height: 6;
+      margin: 0 auto;
+      background-color: #fefefe;
+      padding: 32px;
+      border-radius: 8px;
+      box-shadow: 0 0 16px rgba(0, 0, 0, 0.1);
+    }
+
+    form {
+      width: 100%;      
+    }
+
+    table {
+      width: 100%;
+    }
+    td {
+      padding: 0 10px;
+    }
+    td:nth-child(1) {
+      width: 80px;
+      font-size: 14px;
+      color: #666666;
+    }
+
+    td:nth-child(2) {
+      width: 80%;
+    }
+
+    input {
+      height: 30px;
+      border: 1px solid #cfcfcf;
+      padding: 0 4px;
+      outline: 0;
+      font-size: 12px;
+      color: #666666;
+      transition: border 0.4s;
+    }
+    input.error {
+      border-color: #ed7d30;
+    }
+
+    input.success {
+      border-color: #5bc543;
+    }
+
+    .gap {
+      margin-right: 20px;
+    }
+
+    .firstInputPerLine {
+      width: 40%;
+    }
+
+    .wrap {
+      vertical-align: middle;
+      font-size: 0;
+    }
+
+    .wrap input {
+      width: calc(40% - 36px);
+      border-right: 0;
+    }
+
+    .button {
+      display: inline-block;
+      width: 36px;
+      height: 32px;
+      text-align: center;
+      line-height: 32px;
+      font-size: 12px;
+      color: #ffffff;
+      cursor: pointer;
+      transition: background-color 0.4s;
+    }
+    .button.unit {
+      height: 30px;
+      line-height: 30px;
+      border: 1px solid #cfcfcf;
+      border-left: 0;
+      color: #666666;
+    }
+    .button.check {
+      background-color: #64adf8;
+    }
+    .button.check::after {
+      content: '验';
+    }
+
+    .button.error {
+      background-color: #ed7d30;
+    }
+    .button.error::after {
+      content: 'X';
+    }
+
+    .button.success {
+      background-color: #5bc543;
+    }
+    .button.success::after {
+      content: '√';
+    }
+
+    #save {
+      position: relative;
+      width: 50%;
+      height: 32px;
+      line-height: 32px;
+      border: 0;
+      margin: 0 auto;
+      cursor: pointer;
+      background-color: #4fa983;
+    }
+    .saveText {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      font-size: 12px;
+      color: #ffffff;
+    }
+    #saveBackgroundEffect {
+      position: absolute;
+      z-index: 1;
+      top: 0;
+      width: 0;
+      height: 100%;
+      transition: width 0.2s linear;
+    }
+    #saveBackgroundEffect.success {
+      left: 0;
+      width: 100%;
+      background-color: #5bc543;
+    }
+    #saveBackgroundEffect.error {
+      right: 0;
+      width: 100%;
+      background-color: #ed7d30;
+    }
+    #saveBackgroundEffect.successToNormal {
+      left: 0;
+      width: 0;
+      background-color: #5bc543;
+    }
+    #saveBackgroundEffect.errorToNormal {
+      right: 0;
+      width: 0;
+      background-color: #ed7d30;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Prometheus-nVisual 集成插件配置</h1>
+  <main>
+    <form action="" autocomplete="off">
+      <table>
+        <tr>
+          <td>nVisual 访问地址</td>
+          <td>
+            <input type="text" id="nVisualUrlInput" class="firstInputPerLine gap">
+            <input type="text" id="nVisualUserNameInput" placeholder="请输入用户名" class="gap">
+            <input type="password" id="nVisualPwdInput" placeholder="请输入密码" class="gap">
+            <div id="checkNvisual" class="button check"></div>
+          </td>
+        </tr>
+        <tr>
+          <td>alertmanager 访问地址</td>
+          <td>
+            <div class="wrap">
+              <input type="text" id="alertmanagerUrlInput" class="firstInputPerLine">
+              <span id="checkAlertmanager" class="button check"></span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>prometheus 访问地址</td>
+          <td>
+            <div class="wrap">
+              <input type="text" id="prometheusUrlInput" class="firstInputPerLine">
+              <span id="checkPrometheus" class="button check"></span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>grafana 访问地址</td>
+          <td>
+            <div class="wrap">
+              <input type="text" id="grafanaUrlInput" class="firstInputPerLine">
+              <span id="checkGrafana" class="button check"></span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>同步周期</td>
+          <td>
+            <div class="wrap">
+              <input type="number" id="cycleInput" class="firstInputPerLine">
+              <span class="button unit">S</span>
+            </div>
+          </td>
+        </tr>
+      </table>
+    </form>
+    <div id="save">
+      <div class="saveText">保存</div>
+      <div id="saveBackgroundEffect"></div>
+    </div>
+  </main>
+  <script>
+    const host = location.origin;
+      // const host = 'http://192.168.100.201:9999';
+    const getConfigRequestUrl = host + '/wapi/v1/get_config';
+    const updateConfigRequestUrl = host + '/wapi/v1/update_config';
+    const requestProxy = host + '/wapi/v1/monitor/health';
+    const nVisualUrlInput = document.getElementById('nVisualUrlInput');
+    const nVisualUserNameInput = document.getElementById('nVisualUserNameInput');
+    const nVisualPwdInput = document.getElementById('nVisualPwdInput');
+    const alertmanagerUrlInput = document.getElementById('alertmanagerUrlInput');
+    const prometheusUrlInput = document.getElementById('prometheusUrlInput');
+    const grafanaUrlInput = document.getElementById('grafanaUrlInput');
+    const cycleInput = document.getElementById('cycleInput');
+
+    const checkUrl = (url) => {
+      const lastLetterIsDiagonal = url.charAt(url.length - 1) === '/';
+      if (lastLetterIsDiagonal) {
+        return url.slice(0, url.length - 1);
+      }
+      return url;
+    }
+    const request = (url, data, getStatus) => {
+      let res;
+      if (data) {
+        res = fetch(url, {
+          method: 'post',
+          headers: {
+            'Content-Type': 'application/json' // 设置请求头，告诉服务器数据是以JSON格式发送的
+          },
+          body: JSON.stringify(data)
+        })
+      } else {
+        res = fetch(url);
+      }
+      return res
+        .then((r) => {
+          return r.json();
+        })
+        .then((data) => {
+          return data;
+        })
+    }
+    const getConfig = async () => {
+      return request(getConfigRequestUrl);
+    }
+
+    const dataInit = async (params) => {
+      const data = await getConfig();
+      nVisualUrlInput.value = data.nVisual;
+      nVisualUserNameInput.value = data.username;
+      nVisualPwdInput.value = data.password
+      alertmanagerUrlInput.value = data.alertmanager
+      prometheusUrlInput.value = data.prometheus;
+      grafanaUrlInput.value = data.grafana;
+      cycleInput.value = data.syncPeriod;
+    }
+
+    dataInit();
+
+    const checkNvisualBtn = document.getElementById('checkNvisual');
+    const checkAlertmanagerBtn = document.getElementById('checkAlertmanager');
+    const checkPrometheusBtn = document.getElementById('checkPrometheus');
+    const checkGrafanaBtn = document.getElementById('checkGrafana');
+    const saveBtn = document.getElementById('save');
+    const saveBackgroundEffect = document.getElementById('saveBackgroundEffect');
+
+    let nVisualResult = true;
+    let alertmanagerResult = true;
+    let prometheusResult = true;
+    let grafanaResult = true;
+
+    const firstInputPerLineClassName = 'firstInputPerLine';
+    const inputGapClassName = ' gap';
+    const inputErrorClassName = ' error';
+    const inputSuccessClassName = ' success';
+    const btnCheckClassName = 'button check';
+    const btnErrorClassName = 'button error';
+    const btnSuccessClassName = 'button success';
+    const saveBtnSuccessClassName = 'success';
+    const saveBtnErrorClassName = 'error';
+    const saveBtnSuccessToNormalClassName = 'successToNormal';
+    const saveBtnErrorToNormalClassName = 'errorToNormal';
+
+    const resetSaveBtnStatus = () => {
+      if (saveBackgroundEffect.className === saveBtnSuccessClassName) {
+        saveBackgroundEffect.className = saveBtnSuccessToNormalClassName;
+      } else if (saveBackgroundEffect.className === saveBtnErrorClassName) {
+        saveBackgroundEffect.className = saveBtnErrorToNormalClassName;
+      }
+    }
+
+    nVisualUrlInput.oninput = () => {
+      checkNvisualBtn.className = btnCheckClassName;
+      nVisualResult = false;
+      saveBtn.className = '';
+      nVisualUrlInput.className = firstInputPerLineClassName + inputGapClassName
+      nVisualUserNameInput.className = inputGapClassName
+      nVisualPwdInput.className = inputGapClassName
+      resetSaveBtnStatus();
+    }
+
+    nVisualUserNameInput.oninput = () => {
+      checkNvisualBtn.className = btnCheckClassName;
+      nVisualResult = false;
+      saveBtn.className = '';
+      nVisualUrlInput.className = firstInputPerLineClassName + inputGapClassName
+      nVisualUserNameInput.className = inputGapClassName
+      nVisualPwdInput.className = inputGapClassName
+      resetSaveBtnStatus();
+    }
+
+    nVisualPwdInput.oninput = () => {
+      checkNvisualBtn.className = btnCheckClassName;
+      nVisualResult = false;
+      saveBtn.className = '';
+      nVisualUrlInput.className = firstInputPerLineClassName + inputGapClassName
+      nVisualUserNameInput.className = inputGapClassName
+      nVisualPwdInput.className = inputGapClassName
+      resetSaveBtnStatus();
+    }
+
+    alertmanagerUrlInput.oninput = () => {
+      checkAlertmanagerBtn.className = btnCheckClassName;
+      alertmanagerResult = false;
+      saveBtn.className = '';
+      alertmanagerUrlInput.className = firstInputPerLineClassName;
+      resetSaveBtnStatus();
+    }
+
+    prometheusUrlInput.oninput = () => {
+      checkPrometheusBtn.className = btnCheckClassName;
+      prometheusResult = false;
+      saveBtn.className = '';
+      prometheusUrlInput.className = firstInputPerLineClassName;
+      resetSaveBtnStatus();
+    }
+
+    grafanaUrlInput.oninput = () => {
+      checkGrafanaBtn.className = btnCheckClassName;
+      grafanaResult = false;
+      saveBtn.className = '';
+      grafanaUrlInput.className = firstInputPerLineClassName;
+      resetSaveBtnStatus();
+    }
+
+    cycleInput.oninput = () => {
+      resetSaveBtnStatus();
+    }
+
+    const checkIsSaveable = () => {
+      const result = nVisualResult && alertmanagerResult && prometheusResult && grafanaResult;
+      if (nVisualResult && alertmanagerResult && prometheusResult && grafanaResult) {
+        saveBtn.className = 'active'
+      } else {
+        saveBtn.className = ''
+      }
+      return result;
+    }
+
+    checkNvisualBtn.onclick = () => {
+      request(requestProxy, {
+        url: checkUrl(nVisualUrlInput.value),
+        type: 'nVisual',
+        username: nVisualUserNameInput.value,
+        password: nVisualPwdInput.value
+      })
+        .then((data) => {
+          if (data.code === 200) {
+            checkNvisualBtn.className = btnSuccessClassName
+            nVisualUrlInput.className = firstInputPerLineClassName + inputGapClassName + inputSuccessClassName;
+            nVisualUserNameInput.className = inputGapClassName + inputSuccessClassName;
+            nVisualPwdInput.className = inputGapClassName + inputSuccessClassName;
+          } else {
+            checkNvisualBtn.className = btnErrorClassName
+            nVisualUrlInput.className = firstInputPerLineClassName + inputGapClassName + inputErrorClassName;
+            nVisualUserNameInput.className = inputGapClassName + inputErrorClassName;
+            nVisualPwdInput.className = inputGapClassName + inputErrorClassName;
+            alert('用户名或密码错误');
+          }
+        })
+        .catch((e) => {
+          checkNvisualBtn.className = btnErrorClassName
+          nVisualUrlInput.className = firstInputPerLineClassName + inputGapClassName + inputErrorClassName;
+          nVisualUserNameInput.className = inputGapClassName + inputErrorClassName;
+          nVisualPwdInput.className = inputGapClassName + inputErrorClassName;
+          alert(e);
+        })
+    }
+
+    checkAlertmanagerBtn.onclick = () => {
+      request(requestProxy, {
+        url: checkUrl(alertmanagerUrlInput.value) + '/api/v1/status',
+        type: 'alertmanager'
+      })
+        .then((data) => {
+          if (data.code === 200) {
+            checkAlertmanagerBtn.className = btnSuccessClassName
+            alertmanagerUrlInput.className = firstInputPerLineClassName + inputSuccessClassName;
+          } else {
+            checkAlertmanagerBtn.className = btnErrorClassName
+            alertmanagerUrlInput.className = firstInputPerLineClassName + inputErrorClassName
+          }
+        })
+        .catch((e) => {
+            checkAlertmanagerBtn.className = btnErrorClassName
+            alertmanagerUrlInput.className = firstInputPerLineClassName + inputErrorClassName
+            alert(e);
+        })
+    }
+
+    checkPrometheusBtn.onclick = () => {
+      request(requestProxy, {
+        url: checkUrl(prometheusUrlInput.value) + '/-/healthy',
+        type: 'prometheus'
+      })
+        .then((data) => {
+          if (data.code === 200) {
+            checkPrometheusBtn.className = btnSuccessClassName
+            prometheusUrlInput.className = firstInputPerLineClassName + inputSuccessClassName;
+          } else {
+            checkPrometheusBtn.className = btnErrorClassName
+            prometheusUrlInput.className = firstInputPerLineClassName + inputErrorClassName
+          }
+        })
+        .catch((e) => {
+          checkPrometheusBtn.className = btnErrorClassName
+          prometheusUrlInput.className = firstInputPerLineClassName + inputErrorClassName 
+          alert(e);
+        })
+    }
+
+    checkGrafanaBtn.onclick = () => {
+      request(requestProxy, {
+        url: checkUrl(grafanaUrlInput.value) + '/api/health',
+        type: 'grafana'
+      })
+        .then((data) => {
+          if (data.code === 200) {
+            checkGrafanaBtn.className = btnSuccessClassName
+            grafanaUrlInput.className = firstInputPerLineClassName + inputSuccessClassName;
+          } else {
+            checkGrafanaBtn.className = btnErrorClassName
+            grafanaUrlInput.className = firstInputPerLineClassName + inputErrorClassName
+          }
+        })
+        .catch((e) => {
+          checkGrafanaBtn.className = btnErrorClassName
+          grafanaUrlInput.className = firstInputPerLineClassName + inputErrorClassName
+          alert(e);
+        })
+    }
+    
+
+    saveBtn.onclick = () => {
+      request(updateConfigRequestUrl, {
+        nVisual: checkUrl(nVisualUrlInput.value),
+        username: nVisualUserNameInput.value,
+        password: nVisualPwdInput.value,
+        alertmanager: checkUrl(alertmanagerUrlInput.value),
+        prometheus: checkUrl(prometheusUrlInput.value),
+        grafana: checkUrl(grafanaUrlInput.value),
+        syncPeriod: cycleInput.value
+      }).then((data) => {
+        if (data) {
+          saveBackgroundEffect.className = saveBtnSuccessClassName;
+        } else {
+          saveBackgroundEffect.className = saveBtnErrorClassName;
+        }
+      }).catch((e) => {
+          saveBackgroundEffect.className = saveBtnErrorClassName;
+          alert(e)
+      })
+    }
+  </script>
+</body>
+</html>
