@@ -474,14 +474,14 @@ public class IpUtil {
                 InetAddress inetAddress = null;
                 try {
                     inetAddress = InetAddress.getByName(ip);
-                } catch (UnknownHostException e) {
+                } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
                 // 检查IP地址是否可达
                 Boolean reachable = null;
                 try {
                     reachable = inetAddress.isReachable(timeout);
-                } catch (IOException e) {
+                } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
                 if (reachable) {

@@ -45,6 +45,9 @@ public class MonitorController {
         String url = health.getUrl();
         String type = health.getType();
         if (type.equals("nVisual")) {
+            System.err.println("url:"+url);
+            System.err.println("username:"+health.getUsername());
+            System.err.println("password:"+health.getPassword());
             Map m = new HashMap();
              url = url+"/diagramApi/wapi/v1/authenticate";
             Map getTokenMap = new HashMap<>();

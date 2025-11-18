@@ -16,6 +16,9 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.ssl.SSLContexts;
 
 import javax.net.ssl.SSLContext;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -99,6 +102,7 @@ public class AuditHistoryService {
         try {
             String responseToken = postJSON(url,jsonString);
             Map responseTokenMap = JSONObject.parseObject(responseToken,Map.class);
+            System.err.println("responseTokenMap:"+responseTokenMap);
             if("200".equals(responseTokenMap.get("code").toString())){
                  data = (Map<String, Object>)responseTokenMap.get("data");
 //                token = (String) data.get("access_token");
@@ -147,7 +151,7 @@ public class AuditHistoryService {
 
     }
 
-    public static String postJSON(String url, String paramjson) {
+    public static String postJSON(String url, String paramjson) throws NoSuchAlgorithmException {
         HttpPost post = new HttpPost(url);
 
         // 设置请求超时配置
@@ -155,11 +159,19 @@ public class AuditHistoryService {
                 .setConnectTimeout(10000)    // 设置连接超时为10秒
                 .setSocketTimeout(10000)     // 设置读取超时为10秒
                 .build();
-
-        post.setConfig(requestConfig);
-
-        HttpClient httpClient = HttpClientBuilder.create().build();
         try {
+        post.setConfig(requestConfig);
+        CloseableHttpClient httpClient;
+        if (url.startsWith("https")) {
+
+            // 创建 SSLContext，禁用证书验证
+            SSLContext sslContext = SSLContexts.custom().loadTrustMaterial((chain, authType) -> true).build();
+            SSLConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE);
+            httpClient = HttpClients.custom().setSSLSocketFactory(socketFactory).build();
+        } else {
+            httpClient = HttpClients.createDefault();
+        }
+
             StringEntity stringEntity = new StringEntity(paramjson, ContentType.APPLICATION_JSON);
             post.setEntity(stringEntity);
 
@@ -172,6 +184,16 @@ public class AuditHistoryService {
             }
         } catch (IOException e) {
             e.printStackTrace();
+            System.err.println(e);
+        } catch (KeyStoreException e) {
+            System.err.println("https问题："+e);
+
+            throw new RuntimeException(e);
+
+        } catch (KeyManagementException e) {
+            System.err.println("https问题："+e);
+
+            throw new RuntimeException(e);
         }
         return null;
     }
