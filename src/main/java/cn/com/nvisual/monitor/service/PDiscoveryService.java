@@ -24,7 +24,7 @@ public class PDiscoveryService {
      JSONArray fetchPrometheusDiscoveryFromNVisual() {
         String token = tokenService.getToken();
         String nvisualParamValue = "/diagramApi/wapi/v1/monitor/prometheus_monitor/all";
-        System.err.println("\n取nvisual内要全量同步的设备列表url:"+nvisualParamValue);
+//        System.err.println("\n取nvisual内要全量同步的设备列表url:"+nvisualParamValue);
         JSONArray jsonArray = auditHistoryService.getJsonArray(nvisualParamValue, token);
         return jsonArray;
     }

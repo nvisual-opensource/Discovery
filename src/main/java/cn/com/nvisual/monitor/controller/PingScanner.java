@@ -37,8 +37,8 @@ public class PingScanner {
     IpDiscoverService ipDiscoverService;
     @Autowired
     ConfigService configService;
-    @Autowired
-    JobService jobService;
+//    @Autowired
+//    JobService jobService;
 
     //ip扫描发现列表
     @RequestMapping(value = "/monitor/ip_discovery_old", method = RequestMethod.POST)
@@ -209,7 +209,6 @@ public class PingScanner {
             return 0;
         });
         // 输出排序后的可达IP地址
-        System.out.println("Discovered Hosts (sorted):");
         for (IpNode node : ipNodes) {
             System.out.println(node);
         }
@@ -289,11 +288,11 @@ public class PingScanner {
 
         return returnData;
     }
-    @RequestMapping(value = "/job/get", method = RequestMethod.GET)
-    public JSONArray getJob(HttpServletResponse httpServletResponse) {
-        JSONArray job = jobService.getJob();
-        return job;
-    }
+//    @RequestMapping(value = "/job/get", method = RequestMethod.GET)
+//    public JSONArray getJob(HttpServletResponse httpServletResponse) {
+//        JSONArray job = jobService.getJob();
+//        return job;
+//    }
     //从nvisual获取目录
     @RequestMapping(value = "/monitor/directory/{nodeId}", method = RequestMethod.GET)
     public JSONArray getIpDiscovery(@PathVariable Long nodeId

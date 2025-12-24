@@ -1,6 +1,6 @@
 package cn.com.nvisual.monitor.controller;
 import cn.com.nvisual.monitor.config.AppConfig;
-import cn.com.nvisual.monitor.service.JobService;
+//import cn.com.nvisual.monitor.service.JobService;
 import cn.com.nvisual.monitor.service.ConfigService;
 import cn.com.nvisual.monitor.service.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +17,8 @@ public class ConfigController {
 
     @Autowired
     private AppConfig appConfig;
-    @Autowired
-    JobService jobService;
+//    @Autowired
+//    JobService jobService;
     @Autowired
     TokenService tokenService;
 
@@ -32,50 +32,38 @@ public class ConfigController {
             appConfig.setnVisual(newConfig.get("nVisual"));
             configService.updateSetting("nVisual", newConfig.get("nVisual"));
         }
-        if (newConfig.containsKey("prometheus")) {
-            appConfig.setPrometheus(newConfig.get("prometheus"));
-            configService.updateSetting("prometheus", newConfig.get("prometheus"));
-        }
-        if (newConfig.containsKey("grafana")) {
-            appConfig.setGrafana(newConfig.get("grafana"));
-            configService.updateSetting("grafana", newConfig.get("grafana"));
-        }
+
         if (newConfig.containsKey("syncPeriod")) {
             appConfig.setSyncPeriod(Integer.parseInt(newConfig.get("syncPeriod")));
             configService.updateSetting("syncPeriod", newConfig.get("syncPeriod"));
         }
-        if (newConfig.containsKey("username")) {
-            appConfig.setUsername(newConfig.get("username"));
-            configService.updateSetting("username", newConfig.get("username"));
+        if (newConfig.containsKey("nVisual_api_key")) {
+            appConfig.setnVisual_api_key(newConfig.get("nVisual_api_key"));
+            configService.updateSetting("nVisual_api_key", newConfig.get("nVisual_api_key"));
         }
-        if (newConfig.containsKey("password")) {
-            appConfig.setPassword(newConfig.get("password"));
-            configService.updateSetting("password", newConfig.get("password"));
+        if (newConfig.containsKey("AI")) {
+            appConfig.setAI(newConfig.get("AI"));
+            configService.updateSetting("AI", newConfig.get("AI"));
         }
-        if (newConfig.containsKey("alertmanager")) {
-            appConfig.setAlertmanager(newConfig.get("alertmanager"));
-            configService.updateSetting("alertmanager", newConfig.get("alertmanager"));
+        if (newConfig.containsKey("AI_api_key")) {
+            appConfig.setAI_api_key(newConfig.get("AI_api_key"));
+            configService.updateSetting("AI_api_key", newConfig.get("AI_api_key"));
         }
 
 
         // 准备返回内容
         Map<String, String> updatedConfig = new HashMap<>(newConfig);
-
         tokenService.init();
-        jobService.init();
         return ResponseEntity.ok(updatedConfig);
     }
     @GetMapping("/get_config")
     public ResponseEntity<Map<String, String>> getConfig() throws IOException {
         Map<String, String> configMap = new HashMap<>();
         configMap.put("nVisual", appConfig.getnVisual());
-        configMap.put("prometheus", appConfig.getPrometheus());
-        configMap.put("grafana", appConfig.getGrafana());
+        configMap.put("nVisual_api_key", appConfig.getnVisual_api_key());
+        configMap.put("AI", appConfig.getAI());
+        configMap.put("AI_api_key", appConfig.getAI_api_key());
         configMap.put("syncPeriod", String.valueOf(appConfig.getSyncPeriod()));
-        configMap.put("username", appConfig.getUsername());
-        configMap.put("password", appConfig.getPassword());
-        configMap.put("alertmanager", appConfig.getAlertmanager());
-
         return ResponseEntity.ok(configMap);
     }
 }

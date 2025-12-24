@@ -16,21 +16,17 @@ public class AppConfig {
     private ConfigService configService;
 
     private String nVisual;
-    private String prometheus;
-    private String grafana;
-    private String username;
-    private String password;
-    private String alertmanager;
+    private String nVisual_api_key;
+    private String AI;
+    private String AI_api_key;
     private int syncPeriod;
 
     @PostConstruct
     public void init() {
         nVisual = configService.getSetting("nVisual");
-        prometheus = configService.getSetting("prometheus");
-        grafana = configService.getSetting("grafana");
-        username = configService.getSetting("username");
-        password = configService.getSetting("password");
-        alertmanager = configService.getSetting("alertmanager");
+        nVisual_api_key = configService.getSetting("nVisual_api_key");
+        AI = configService.getSetting("AI");
+        AI_api_key = configService.getSetting("AI_api_key");
         syncPeriod = Integer.parseInt(configService.getSetting("syncPeriod"));
 
         logConfig();
@@ -38,23 +34,15 @@ public class AppConfig {
 
     public void logConfig() {
         logger.info("nVisual: {}", nVisual);
-        logger.info("Prometheus: {}", prometheus);
-        logger.info("Grafana: {}", grafana);
-        logger.info("Username: {}", username);
-        logger.info("Password: {}", password);
-        logger.info("SyncPeriod: {}", syncPeriod);
-        logger.info("alertmanager: {}", alertmanager);
+        logger.info("nVisual_api_key: {}", nVisual_api_key);
+        logger.info("AI: {}", AI);
+        logger.info("AI_api_key: {}", AI_api_key);
+        logger.info("syncPeriod: {}", syncPeriod);
     }
 
     // Getters and Setters
 
-    public String getAlertmanager() {
-        return alertmanager;
-    }
 
-    public void setAlertmanager(String alertmanager) {
-        this.alertmanager = alertmanager;
-    }
 
     public String getnVisual() {
         return nVisual;
@@ -64,36 +52,36 @@ public class AppConfig {
         this.nVisual = nVisual;
     }
 
-    public String getPrometheus() {
-        return prometheus;
+    public ConfigService getConfigService() {
+        return configService;
     }
 
-    public void setPrometheus(String prometheus) {
-        this.prometheus = prometheus;
+    public void setConfigService(ConfigService configService) {
+        this.configService = configService;
     }
 
-    public String getGrafana() {
-        return grafana;
+    public String getnVisual_api_key() {
+        return nVisual_api_key;
     }
 
-    public void setGrafana(String grafana) {
-        this.grafana = grafana;
+    public void setnVisual_api_key(String nVisual_api_key) {
+        this.nVisual_api_key = nVisual_api_key;
     }
 
-    public String getUsername() {
-        return username;
+    public String getAI() {
+        return AI;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setAI(String AI) {
+        this.AI = AI;
     }
 
-    public String getPassword() {
-        return password;
+    public String getAI_api_key() {
+        return AI_api_key;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setAI_api_key(String AI_api_key) {
+        this.AI_api_key = AI_api_key;
     }
 
     public int getSyncPeriod() {

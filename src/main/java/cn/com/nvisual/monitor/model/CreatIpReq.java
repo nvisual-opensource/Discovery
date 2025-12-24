@@ -1,4 +1,4 @@
-package com.nvisual.monitor.model;
+package cn.com.nvisual.monitor.model;
 
 import lombok.Data;
 

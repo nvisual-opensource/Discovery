@@ -47,7 +47,6 @@ public class SnmpDiscoveryService {
                     }
 
                     int i = 1;
-                    System.err.println("i:" + i);
                     i++;
                     // 创建一个SNMP实例，并启动SNMP监听，准备发送请求。
                     Snmp snmp = new Snmp(new DefaultUdpTransportMapping());

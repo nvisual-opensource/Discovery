@@ -35,7 +35,6 @@ public class IpDiscoverService {
     }
     private void networkMonitoring() {//入网监测
         for (int i = 1; i >0 ; i++) {
-            System.err.println("i:"+i);
             //获取缓存内的nVisual设备列表
              JSONArray prometheusdiscovery = pDiscoveryService.getPrometheusDiscovery();
             System.err.println("缓存内的nVisual设备列表大小:"+prometheusdiscovery.size());
@@ -46,14 +45,12 @@ public class IpDiscoverService {
                          String oip = obj.getString("ip");
                          nVisualIps.add(oip);
                      }
-                     System.err.println("nVisualIps:"+nVisualIps);
                      List<String> disIps = new ArrayList<>();
                      if (nm!=null){
                          List<IpNode> filteredHostList = nm.stream()
                                  .filter(host -> !nVisualIps.contains(host.getIp()))
                                  .collect(Collectors.toList());
                          nm = filteredHostList;
-                         System.err.println("nm0："+nm);
 
                          for (IpNode in:
                                  nm) {
@@ -93,12 +90,10 @@ public class IpDiscoverService {
                          nm = nm1;
                      }
                      if (reachableIPs2!=null){
-                         System.err.println("reachableIPs2："+reachableIPs2);
                          List<IpNode> nm1 = new ArrayList<>();
                          nm1.addAll(reachableIPs2);
                          nm1.addAll(nm);
                          nm = nm1;
-                         System.err.println("nm："+nm);
 
                      }
 

@@ -46,16 +46,16 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static com.sun.corba.se.impl.util.RepositoryId.cache;
+//import static com.sun.corba.se.impl.util.RepositoryId.cache;
 
 /**
  * Created by DanielTog on Jun, 2021
  */
 @Service
 public class AuditHistoryService {
-    public void clearCache() {
-        cache.clear();
-    }
+//    public void clearCache() {
+//        cache.clear();
+//    }
 
     @Autowired
     private AppConfig appConfig;
@@ -324,53 +324,95 @@ public class AuditHistoryService {
                 }
             }
 
-            // 处理响应
+            // 统一返回格式处理
+            Map<String, Object> resultMap = new HashMap<>();
+
             if (responseCode == HttpURLConnection.HTTP_OK) {
                 if (!responseBody.isEmpty()) {
                     Object responseObject = objectMapper.readValue(responseBody, Object.class);
 
+                    // 处理不同的响应格式
                     if (responseObject instanceof List) {
-                        return responseObject;
+                        // 如果是数组格式，转换为目标格式
+                        resultMap.put("code", responseCode);
+                        resultMap.put("data", responseObject);
+                        resultMap.put("message", "请求成功");
                     } else if (responseObject instanceof Map) {
-                        return responseObject;
+                        // 如果已经是Map格式，检查是否包含必要的字段
+                        Map<String, Object> responseMap = (Map<String, Object>) responseObject;
+
+                        // 如果已经包含code、data、message，直接使用
+                        if (responseMap.containsKey("code") && responseMap.containsKey("data") && responseMap.containsKey("message")) {
+                            return responseMap;
+                        } else {
+                            // 如果不完整，重新构建标准格式
+                            resultMap.put("code", responseMap.getOrDefault("code", responseCode));
+                            resultMap.put("data", responseMap.getOrDefault("data", responseMap));
+                            resultMap.put("message", responseMap.getOrDefault("message", "请求成功"));
+                        }
                     } else {
-                        Map<String, Object> errorMap = new HashMap<>();
-                        errorMap.put("code", 500);
-                        errorMap.put("message", "未知的响应格式");
-                        return errorMap;
+                        // 其他格式
+                        resultMap.put("code", responseCode);
+                        resultMap.put("data", responseObject);
+                        resultMap.put("message", "请求成功");
                     }
                 } else {
-                    Map<String, Object> successMap = new HashMap<>();
-                    successMap.put("code", 200);
-                    successMap.put("message", "请求成功，但无响应体");
-                    return successMap;
+                    // 空响应体
+                    resultMap.put("code", 200);
+                    resultMap.put("data", null);
+                    resultMap.put("message", "请求成功，但无响应体");
                 }
             } else {
                 // 错误响应处理
-                Map<String, Object> errorMap = new HashMap<>();
-                errorMap.put("code", responseCode);
-                errorMap.put("message", "请求失败，状态码: " + responseCode);
-
                 if (!responseBody.isEmpty()) {
                     try {
                         Object errorObject = objectMapper.readValue(responseBody, Object.class);
-                        if (errorObject instanceof List || errorObject instanceof Map) {
-                            errorMap.put("data", errorObject);
+
+                        if (errorObject instanceof List) {
+                            // 错误响应是数组格式
+                            resultMap.put("code", responseCode);
+                            resultMap.put("data", errorObject);
+                            resultMap.put("message", "请求失败，状态码: " + responseCode);
+                        } else if (errorObject instanceof Map) {
+                            // 错误响应是Map格式
+                            Map<String, Object> errorMap = (Map<String, Object>) errorObject;
+
+                            if (errorMap.containsKey("code") && errorMap.containsKey("data") && errorMap.containsKey("message")) {
+                                // 如果已经是标准格式，直接使用
+                                return errorMap;
+                            } else {
+                                // 转换为标准格式
+                                resultMap.put("code", errorMap.getOrDefault("code", responseCode));
+                                resultMap.put("data", errorMap.getOrDefault("data", errorMap));
+                                resultMap.put("message", errorMap.getOrDefault("message", "请求失败，状态码: " + responseCode));
+                            }
                         } else {
-                            errorMap.put("response", responseBody);
+                            // 其他错误格式
+                            resultMap.put("code", responseCode);
+                            resultMap.put("data", errorObject);
+                            resultMap.put("message", "请求失败，状态码: " + responseCode);
                         }
                     } catch (Exception e) {
-                        errorMap.put("response", responseBody);
+                        // 解析失败，使用原始响应体
+                        resultMap.put("code", responseCode);
+                        resultMap.put("data", responseBody);
+                        resultMap.put("message", "请求失败，状态码: " + responseCode);
                     }
+                } else {
+                    // 空错误响应体
+                    resultMap.put("code", responseCode);
+                    resultMap.put("data", null);
+                    resultMap.put("message", "请求失败，状态码: " + responseCode);
                 }
-
-                return errorMap;
             }
+
+            return resultMap;
 
         } catch (Exception e) {
             e.printStackTrace();
             Map<String, Object> errorMap = new HashMap<>();
             errorMap.put("code", 500);
+            errorMap.put("data", null);
             errorMap.put("message", "转发请求异常: " + e.getMessage());
             return errorMap;
         } finally {
@@ -379,6 +421,7 @@ public class AuditHistoryService {
             }
         }
     }
+
     public static void postJSONTokenJob(String u,String token,JSONArray paramjson){
         try {
             // URL of the API
@@ -492,45 +535,6 @@ public class AuditHistoryService {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return ret;
-    }
-    public JSONArray getJsonArrayProm(String paramValue){
-        JSONArray ret = new JSONArray();
-        String url = appConfig.getPrometheus()  + paramValue;
-        // 创建HttpClient实例
-        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-            // 创建HttpGet请求
-            System.err.println("url:"+url);
-
-            HttpGet request = new HttpGet(url);
-
-            // 执行请求
-            try (CloseableHttpResponse response = httpClient.execute(request)) {
-
-                // 检查响应状态码
-                int statusCode = response.getStatusLine().getStatusCode();
-                System.out.println("普罗米修斯接口 code:" + statusCode);
-
-                // 获取响应实体
-                HttpEntity entity = response.getEntity();
-
-                if (entity != null) {
-                    // 将响应内容转换为字符串
-                    String resultString = EntityUtils.toString(entity);
-
-                    // 使用fastjson解析结果字符串
-                    JSONObject jsonObject = JSON.parseObject(resultString);
-                    JSONObject dataObject = jsonObject.getJSONObject("data");
-                    JSONArray resultArray = dataObject.getJSONArray("result");
-
-                    // 输出结果
-                    ret = resultArray;
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
         return ret;
     }
     public JSONArray getJsonArrayJob(String paramValue){

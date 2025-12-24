@@ -24,8 +24,8 @@ public class SchedulerService {
     private AppConfig appConfig;
     @Autowired
     AuditHistoryService auditHistoryService;
-    @Autowired
-    JobService jobService;
+//    @Autowired
+//    JobService jobService;
     @Autowired
     TokenService tokenService;
 
